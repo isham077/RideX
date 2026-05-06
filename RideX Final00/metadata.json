@@ -1,0 +1,5 @@
+{
+  "name": "SmartRide Pricing Engine",
+  "description": "Dynamic AI-powered pricing engine for ride-hailing services, calculating costs based on real-time traffic, weather, fuel, and demand.",
+  "requestFramePermissions": ["geolocation", "camera"]
+}

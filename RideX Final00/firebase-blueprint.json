@@ -1,0 +1,104 @@
+{
+  "entities": {
+    "Ride": {
+      "title": "Ride",
+      "description": "A ride offered by a driver.",
+      "type": "object",
+      "properties": {
+        "driverId": { "type": "string" },
+        "source": { "type": "string" },
+        "destination": { "type": "string" },
+        "dateTime": { "type": "string", "format": "date-time" },
+        "totalSeats": { "type": "integer" },
+        "seatsAvailable": { "type": "integer" },
+        "carSegment": { "type": "string", "enum": ["Sedan", "SUV", "MPV"] },
+        "price": { "type": "number" },
+        "distance": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "active", "completed", "cancelled"] },
+        "ecoImpact": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["driverId", "source", "destination", "dateTime", "totalSeats", "price", "carSegment"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "A booking made by a passenger for a ride.",
+      "type": "object",
+      "properties": {
+        "rideId": { "type": "string", "description": "ID of the ride being booked" },
+        "passengerId": { "type": "string", "description": "UID of the passenger" },
+        "seatsBooked": { "type": "number", "description": "Number of seats booked" },
+        "status": { "type": "string", "enum": ["confirmed", "cancelled"], "description": "Status of the booking" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Time of booking" }
+      },
+      "required": ["rideId", "passengerId", "seatsBooked", "status", "timestamp"]
+    },
+    "Baggage": {
+      "title": "Baggage",
+      "description": "Baggage information for a passenger on a ride.",
+      "type": "object",
+      "properties": {
+        "rideId": { "type": "string", "description": "ID of the ride" },
+        "passengerId": { "type": "string", "description": "UID of the passenger" },
+        "description": { "type": "string", "description": "Description of the baggage" },
+        "weight": { "type": "number", "description": "Weight of the baggage in kg" }
+      },
+      "required": ["rideId", "passengerId", "description"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A review given by a user to another user after a ride.",
+      "type": "object",
+      "properties": {
+        "rideId": { "type": "string", "description": "ID of the ride" },
+        "reviewerId": { "type": "string", "description": "UID of the user giving the review" },
+        "revieweeId": { "type": "string", "description": "UID of the user being reviewed" },
+        "rating": { "type": "number", "description": "Rating given (1-5)" },
+        "comment": { "type": "string", "description": "Optional comment" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Time of review" }
+      },
+      "required": ["rideId", "reviewerId", "revieweeId", "rating", "timestamp"]
+    },
+    "Profile": {
+      "title": "Profile",
+      "description": "User profile extension including emergency contact details.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the user" },
+        "emergencyContact": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "description": "Name of the emergency contact" },
+            "relationship": { "type": "string", "description": "Relationship to the user" },
+            "phone": { "type": "string", "description": "Phone number of the emergency contact" }
+          },
+          "required": ["name", "relationship", "phone"]
+        },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId"]
+    }
+  },
+  "firestore": {
+    "/profiles/{profileId}": {
+      "schema": "Profile",
+      "description": "Collection of user profile extensions."
+    },
+    "/rides/{rideId}": {
+      "schema": "Ride",
+      "description": "Collection of ride requests and their pricing history."
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Collection of ride bookings."
+    },
+    "/baggage/{baggageId}": {
+      "schema": "Baggage",
+      "description": "Collection of baggage information."
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Collection of ride reviews."
+    }
+  }
+}

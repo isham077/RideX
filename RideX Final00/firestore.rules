@@ -1,0 +1,185 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email == "shabin0938@gmail.com" && request.auth.token.email_verified == true)
+        );
+    }
+
+    function hasRequiredFields(data, fields) {
+      return data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(data, fields) {
+      return data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(data, ['displayName', 'email', 'role', 'trustScore', 'rating', 'completionRate', 'reliability', 'ecoImpact', 'isVerified']) &&
+             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.role in ['passenger', 'driver', 'admin'] &&
+             data.trustScore is number && data.trustScore >= 0 && data.trustScore <= 100 &&
+             data.rating is number && data.rating >= 0 && data.rating <= 10 &&
+             data.completionRate is number && data.completionRate >= 0 && data.completionRate <= 100 &&
+             data.reliability is number && data.reliability >= 0 && data.reliability <= 100 &&
+             data.ecoImpact is number && data.ecoImpact >= 0 &&
+             data.isVerified is bool;
+    }
+
+    function isValidRide(data) {
+      return hasRequiredFields(data, ['source', 'destination', 'dateTime', 'seatsAvailable', 'totalSeats', 'price', 'status', 'driverId', 'carSegment']) &&
+             data.source is string && data.source.size() > 0 &&
+             data.destination is string && data.destination.size() > 0 &&
+             data.price is number && data.price >= 0 &&
+             data.driverId == request.auth.uid &&
+             data.carSegment in ['Sedan', 'SUV', 'MPV'] &&
+             data.status in ['pending', 'active', 'completed', 'cancelled'];
+    }
+
+    function isValidBooking(data) {
+      return hasRequiredFields(data, ['rideId', 'passengerId', 'seatsBooked', 'status', 'timestamp']) &&
+             data.rideId is string &&
+             data.passengerId == request.auth.uid &&
+             data.seatsBooked is number && data.seatsBooked > 0 &&
+             data.status in ['confirmed', 'cancelled', 'pending', 'completed'];
+    }
+
+    function isValidBaggage(data) {
+      return hasRequiredFields(data, ['rideId', 'passengerId', 'description', 'imageUrl']) &&
+             data.rideId is string &&
+             data.passengerId == request.auth.uid &&
+             data.description is string && data.description.size() > 0;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['rideId', 'reviewerId', 'revieweeId', 'rating', 'timestamp']) &&
+             data.reviewerId == request.auth.uid &&
+             data.rideId is string &&
+             data.revieweeId is string &&
+             data.rating is number && data.rating >= 1 && data.rating <= 10 &&
+             (!('comment' in data) || (data.comment is string && data.comment.size() <= 1000)) &&
+             (!('feedbackTags' in data) || (data.feedbackTags is list && data.feedbackTags.size() <= 20));
+    }
+
+    function isTrustUpdate(data, prev) {
+      return data.diff(prev).affectedKeys().hasOnly(['rating', 'trustScore', 'completionRate', 'reliability', 'ecoImpact']);
+    }
+
+    function isValidProfile(data) {
+      return hasRequiredFields(data, ['userId', 'emergencyContact', 'updatedAt']) &&
+             data.userId == request.auth.uid &&
+             data.emergencyContact.keys().hasAll(['name', 'relationship', 'phone']) &&
+             data.emergencyContact.name is string && data.emergencyContact.name.size() > 0 &&
+             data.emergencyContact.relationship is string && data.emergencyContact.relationship.size() > 0 &&
+             data.emergencyContact.phone is string && data.emergencyContact.phone.size() > 0;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role != 'admin';
+      allow update: if isAuthenticated() && (
+        isOwner(userId) || 
+        isAdmin() ||
+        isTrustUpdate(request.resource.data, resource.data)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Rides Collection
+    match /rides/{rideId} {
+      allow get: if true;
+      allow list: if isAuthenticated() || resource.data.status == 'pending';
+      allow create: if isAuthenticated() && isValidRide(request.resource.data);
+      allow update: if isAuthenticated() && (
+        resource.data.driverId == request.auth.uid || 
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seatsAvailable']) && request.resource.data.seatsAvailable <= resource.data.totalSeats) ||
+        isAdmin()
+      );
+      allow delete: if isAuthenticated() && (resource.data.driverId == request.auth.uid || isAdmin());
+    }
+
+    // Bookings Collection
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() && (
+        resource.data.passengerId == request.auth.uid || 
+        get(/databases/$(database)/documents/rides/$(resource.data.rideId)).data.driverId == request.auth.uid
+      );
+      allow create: if isAuthenticated() && isValidBooking(request.resource.data);
+      allow update: if isAuthenticated() && (
+        resource.data.passengerId == request.auth.uid || 
+        get(/databases/$(database)/documents/rides/$(resource.data.rideId)).data.driverId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAuthenticated() && (resource.data.passengerId == request.auth.uid || isAdmin());
+    }
+
+    // Baggage Collection
+    match /baggage/{baggageId} {
+      allow read: if isAuthenticated() && (
+        resource.data.passengerId == request.auth.uid || 
+        get(/databases/$(database)/documents/rides/$(resource.data.rideId)).data.driverId == request.auth.uid
+      );
+      allow create: if isAuthenticated() && isValidBaggage(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.passengerId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Reviews Collection
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidReview(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    // Profiles Collection
+    match /profiles/{profileId} {
+      allow read: if isAuthenticated() && (isOwner(profileId) || isAdmin());
+      allow create, update: if isOwner(profileId) && isValidProfile(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // Declarations
+    match /declarations/{id} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated();
+    }
+
+    // Alerts
+    match /alerts/{id} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
