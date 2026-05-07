@@ -30,6 +30,11 @@ export interface Ride {
   status: RideStatus;
   ecoImpact: number;
   createdAt: string;
+  checkpointManifest?: {
+    driver: { displayName: string; trustScore: number; rating: number };
+    passengers: { uid: string; displayName: string; baggage: { description: string; imageUrl: string } | null }[];
+    generatedAt: string;
+  };
 }
 
 export interface Booking {

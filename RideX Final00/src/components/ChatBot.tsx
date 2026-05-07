@@ -160,6 +160,8 @@ export const ChatBot: React.FC = () => {
 
         Formatting Guidelines:
         - Use Markdown for structure.
+        - When listing rides, ALWAYS use a readable format like "Ride from [Source] to [Destination]" as the header/bullet point, NEVER the raw Ride ID.
+        - Only mention the raw Ride ID if the user explicitly needs it, and keep it unobtrusive.
         - **Bold** prices and status.
         - Bullet points for lists.
         - Tables for comparisons of more than 2 rides.`

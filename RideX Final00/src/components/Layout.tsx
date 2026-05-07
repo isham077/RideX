@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthButton } from "./AuthButton";
+import { NotificationBell } from "./NotificationBell";
 import { ChatBot } from "./ChatBot";
 import { Car, Search, LayoutDashboard, Shield, MapPin, Menu, X, TrendingUp } from "lucide-react";
 import { useAuth } from "../AuthContext";
@@ -50,7 +51,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   {item.label}
                 </Link>
               ))}
-              <div className="ml-4 pl-4 border-l border-zinc-800">
+              <div className="ml-4 pl-4 border-l border-zinc-800 flex items-center gap-3">
+                {user && <NotificationBell />}
                 <AuthButton />
               </div>
             </div>
@@ -85,7 +87,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   {item.label}
                 </Link>
               ))}
-              <div className="mt-4 pt-4 border-t border-zinc-900">
+              <div className="mt-4 pt-4 border-t border-zinc-900 flex items-center gap-3">
+                {user && <NotificationBell />}
                 <AuthButton />
               </div>
             </div>

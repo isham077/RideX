@@ -10,6 +10,7 @@ import { handleFirestoreError, OperationType } from "../services/firestoreUtils"
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { RatingModal } from "../components/RatingModal";
+import { createNotification, notifyMultipleUsers } from "../services/notificationService";
 
 export const DriverDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -41,6 +42,23 @@ export const DriverDashboard: React.FC = () => {
     loadDriverData();
   }, [user]);
 
+  // Auto-select active or pending ride on load
+  useEffect(() => {
+    if (myRides.length > 0 && !selectedRide) {
+      const activeRide = myRides.find(r => r.status === "active");
+      if (activeRide) {
+        setSelectedRide(activeRide.id);
+        loadPassengers(activeRide.id);
+      } else {
+        const pendingRide = myRides.find(r => r.status === "pending");
+        if (pendingRide) {
+          setSelectedRide(pendingRide.id);
+          loadPassengers(pendingRide.id);
+        }
+      }
+    }
+  }, [myRides, selectedRide]);
+
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
@@ -55,10 +73,22 @@ export const DriverDashboard: React.FC = () => {
         const bookingsQ = query(collection(db, "bookings"), where("rideId", "==", ride.id));
         const bookingsSnap = await getDocs(bookingsQ);
         if (!bookingsSnap.empty) {
-          const cancelPromises = bookingsSnap.docs.map(bDoc => 
+          const cancelPromises = bookingsSnap.docs.map(bDoc =>
             updateDoc(doc(db, "bookings", bDoc.id), { status: "cancelled" })
           );
           await Promise.all(cancelPromises);
+          // Notify all booked passengers
+          const passengerIds = bookingsSnap.docs.map(d => d.data().passengerId as string);
+          const rideForDelete = myRides.find(r => r.id === ride.id);
+          if (rideForDelete) {
+            await notifyMultipleUsers(
+              passengerIds,
+              "ride_cancelled",
+              "Ride Cancelled",
+              `Your ride from ${rideForDelete.source} to ${rideForDelete.destination} has been cancelled by the driver.`,
+              ride.id
+            );
+          }
         }
         // Delete ride
         await deleteDoc(doc(db, "rides", ride.id));
@@ -87,11 +117,23 @@ export const DriverDashboard: React.FC = () => {
       
       if (!bookingsSnap.empty) {
         console.info(`Found ${bookingsSnap.size} bookings. Cancelling...`);
-        const cancelPromises = bookingsSnap.docs.map(bDoc => 
+        const cancelPromises = bookingsSnap.docs.map(bDoc =>
           updateDoc(doc(db, "bookings", bDoc.id), { status: "cancelled" })
         );
         await Promise.all(cancelPromises);
         console.info("All bookings cancelled.");
+        // Notify passengers
+        const passengerIds = bookingsSnap.docs.map(d => d.data().passengerId as string);
+        const rideObj = myRides.find(r => r.id === rideId);
+        if (rideObj) {
+          await notifyMultipleUsers(
+            passengerIds,
+            "ride_cancelled",
+            "Ride Cancelled",
+            `Your ride from ${rideObj.source} to ${rideObj.destination} has been cancelled by the driver.`,
+            rideId
+          );
+        }
       } else {
         console.info("No bookings found for this ride.");
       }
@@ -149,6 +191,31 @@ export const DriverDashboard: React.FC = () => {
   const handleBookingAction = async (bookingId: string, status: "confirmed" | "cancelled") => {
     try {
       await updateDoc(doc(db, "bookings", bookingId), { status });
+
+      // Notify the passenger
+      const passenger = passengers.find(p => p.bookingId === bookingId);
+      if (passenger && selectedRide) {
+        const rideObj = myRides.find(r => r.id === selectedRide);
+        if (rideObj) {
+          if (status === "confirmed") {
+            await createNotification(
+              passenger.uid,
+              "booking_confirmed",
+              "Booking Confirmed! ✅",
+              `Your booking for ${rideObj.source} → ${rideObj.destination} has been confirmed by the driver.`,
+              selectedRide
+            );
+          } else {
+            await createNotification(
+              passenger.uid,
+              "booking_rejected",
+              "Booking Rejected",
+              `Your booking for ${rideObj.source} → ${rideObj.destination} was not accepted by the driver.`,
+              selectedRide
+            );
+          }
+        }
+      }
       
       if (status === "cancelled") {
         const p = passengers.find(pass => pass.bookingId === bookingId);
@@ -201,9 +268,22 @@ export const DriverDashboard: React.FC = () => {
 
       // 3. Update local state
       setMyRides(prev => prev.map(r => r.id === rideId ? { ...r, status: "completed" } : r));
-      setPassengers(prev => prev.map(p => 
+      setPassengers(prev => prev.map(p =>
         p.bookingStatus === "confirmed" ? { ...p, bookingStatus: "completed" as BookingStatus } : p
       ));
+
+      // Notify all confirmed passengers
+      const confirmedPassengerIds = confirmedPassengers.map(p => p.uid);
+      const rideForComplete = myRides.find(r => r.id === rideId);
+      if (rideForComplete && confirmedPassengerIds.length > 0) {
+        await notifyMultipleUsers(
+          confirmedPassengerIds,
+          "ride_completed",
+          "Ride Completed ⭐",
+          `Your ride from ${rideForComplete.source} to ${rideForComplete.destination} is complete. Don't forget to rate your driver!`,
+          rideId
+        );
+      }
       
       alert("Ride successfully completed! Trust scores have been updated for both driver and passengers.");
     } catch (error) {
@@ -423,7 +503,20 @@ export const DriverDashboard: React.FC = () => {
                         try {
                           await updateDoc(doc(db, "rides", selectedRide), { status: "active" });
                           setMyRides(prev => prev.map(r => r.id === selectedRide ? { ...r, status: "active" } : r));
-                        } catch (error) {
+                          // Notify all confirmed passengers that ride has started
+                          const confirmedPassengerIds = passengers
+                            .filter(p => p.bookingStatus === "confirmed")
+                            .map(p => p.uid);
+                          const rideForStart = myRides.find(r => r.id === selectedRide);
+                          if (rideForStart && confirmedPassengerIds.length > 0) {
+                            await notifyMultipleUsers(
+                              confirmedPassengerIds,
+                              "ride_started",
+                              "Your Ride Has Started! 🚗",
+                              `Your ride from ${rideForStart.source} to ${rideForStart.destination} is now in progress.`,
+                              selectedRide
+                            );
+                          }} catch (error) {
                           handleFirestoreError(error, OperationType.UPDATE, `rides/${selectedRide}`);
                         }
                       }}

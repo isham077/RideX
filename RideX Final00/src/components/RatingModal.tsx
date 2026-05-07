@@ -7,6 +7,7 @@ import { useAuth } from "../AuthContext";
 import { User, Ride } from "../types";
 import { cn } from "../lib/utils";
 import { handleFirestoreError, OperationType } from "../services/firestoreUtils";
+import { createNotification } from "../services/notificationService";
 
 interface RatingModalProps {
   ride: Ride;
@@ -103,6 +104,15 @@ export const RatingModal: React.FC<RatingModalProps> = ({ ride, targetUserId, ta
           handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}`);
         }
       }
+
+      // 4. Notify the rated user
+      await createNotification(
+        targetUserId,
+        "rating_received",
+        "New Rating Received ⭐",
+        `${user.displayName || user.email} rated you ${rating}/10 for the ride from ${ride.source} to ${ride.destination}.`,
+        ride.id
+      );
 
       onSuccess();
     } catch (error) {

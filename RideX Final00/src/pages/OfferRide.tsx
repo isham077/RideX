@@ -101,7 +101,10 @@ export const OfferRide: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      alert("You must be logged in to publish a ride.");
+      return;
+    }
     setLoading(true);
 
     try {

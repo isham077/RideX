@@ -23,35 +23,42 @@ export const PublicRideInfo: React.FC = () => {
           const rideData = { ...rideDoc.data(), id: rideDoc.id } as Ride;
           setRide(rideData);
 
-          const driverDoc = await getDoc(doc(db, "users", rideData.driverId));
-          if (driverDoc.exists()) {
-            setDriver({ ...driverDoc.data(), uid: driverDoc.id } as User);
-          }
-
-          const bookingsQ = query(collection(db, "bookings"), where("rideId", "==", id), where("status", "==", "confirmed"));
-          const bookingsSnap = await getDocs(bookingsQ);
-          
-          const baggageQ = query(collection(db, "baggage"), where("rideId", "==", id));
-          const baggageSnap = await getDocs(baggageQ);
-          const baggageMap: Record<string, Baggage> = {};
-          baggageSnap.docs.forEach(d => {
-            const b = { ...d.data(), id: d.id } as Baggage;
-            baggageMap[b.passengerId] = b;
-          });
-
-          const passengerData: (User & { baggage?: Baggage })[] = [];
-          for (const bDoc of bookingsSnap.docs) {
-            const booking = bDoc.data() as Booking;
-            const pDoc = await getDoc(doc(db, "users", booking.passengerId));
-            if (pDoc.exists()) {
-              passengerData.push({ 
-                ...pDoc.data(), 
-                uid: pDoc.id,
-                baggage: baggageMap[booking.passengerId]
-              } as User & { baggage?: Baggage });
+          if (rideData.checkpointManifest) {
+            // Use snapshot data bypass
+            setDriver(rideData.checkpointManifest.driver as User);
+            setPassengers(rideData.checkpointManifest.passengers as unknown as (User & { baggage?: Baggage })[]);
+          } else {
+            // Fallback for authenticated users or missing manifest
+            const driverDoc = await getDoc(doc(db, "users", rideData.driverId));
+            if (driverDoc.exists()) {
+              setDriver({ ...driverDoc.data(), uid: driverDoc.id } as User);
             }
+
+            const bookingsQ = query(collection(db, "bookings"), where("rideId", "==", id), where("status", "==", "confirmed"));
+            const bookingsSnap = await getDocs(bookingsQ);
+            
+            const baggageQ = query(collection(db, "baggage"), where("rideId", "==", id));
+            const baggageSnap = await getDocs(baggageQ);
+            const baggageMap: Record<string, Baggage> = {};
+            baggageSnap.docs.forEach(d => {
+              const b = { ...d.data(), id: d.id } as Baggage;
+              baggageMap[b.passengerId] = b;
+            });
+
+            const passengerData: (User & { baggage?: Baggage })[] = [];
+            for (const bDoc of bookingsSnap.docs) {
+              const booking = bDoc.data() as Booking;
+              const pDoc = await getDoc(doc(db, "users", booking.passengerId));
+              if (pDoc.exists()) {
+                passengerData.push({ 
+                  ...pDoc.data(), 
+                  uid: pDoc.id,
+                  baggage: baggageMap[booking.passengerId]
+                } as User & { baggage?: Baggage });
+              }
+            }
+            setPassengers(passengerData);
           }
-          setPassengers(passengerData);
         }
       } catch (error) {
         handleFirestoreError(error, OperationType.GET, `public-ride/${id}`);

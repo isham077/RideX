@@ -12,6 +12,7 @@ import { cn } from "../lib/utils";
 import { getCurrentLocation } from "../services/geoService";
 import axios from "axios";
 import { motion, AnimatePresence } from "motion/react";
+import { createNotification } from "../services/notificationService";
 
 export const RideDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -227,6 +228,15 @@ export const RideDetails: React.FC = () => {
 
       setUserBooking({ ...bookingData, id: bDocRef.id } as Booking);
       setRide({ ...ride, seatsAvailable: ride.seatsAvailable - 1 });
+
+      // Notify driver of new booking
+      await createNotification(
+        ride.driverId,
+        "booking_new",
+        "New Booking Request",
+        `${user.displayName || user.email} has requested a seat on your ride from ${ride.source} to ${ride.destination}.`,
+        ride.id
+      );
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, "bookings");
     } finally {
@@ -260,6 +270,15 @@ export const RideDetails: React.FC = () => {
         timestamp: new Date().toISOString(),
         location: location
       });
+
+      // 3.5 Notify driver via in-app notification
+      await createNotification(
+        ride.driverId,
+        "sos_alert",
+        "🚨 EMERGENCY SOS ALERT",
+        `${user.displayName || user.email} has triggered an SOS on your ride from ${ride.source} to ${ride.destination}!`,
+        ride.id
+      );
 
       // 4. Send SMS if emergency contact exists
       if (emergencyContact && emergencyContact.phone) {

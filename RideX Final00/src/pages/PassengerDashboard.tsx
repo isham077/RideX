@@ -10,6 +10,7 @@ import { handleFirestoreError, OperationType } from "../services/firestoreUtils"
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { RatingModal } from "../components/RatingModal";
+import { createNotification } from "../services/notificationService";
 
 export const PassengerDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -82,6 +83,17 @@ export const PassengerDashboard: React.FC = () => {
       
       // Refresh list
       setConfirmCancelId(null);
+      // Notify driver of cancellation
+      const bookingFull = myBookings.find(b => b.id === booking.id);
+      if (bookingFull?.ride?.driverId && user) {
+        await createNotification(
+          bookingFull.ride.driverId,
+          "booking_rejected",
+          "Booking Cancelled",
+          `${user.displayName || user.email} has cancelled their booking for ${bookingFull.ride.source} → ${bookingFull.ride.destination}.`,
+          booking.rideId
+        );
+      }
       await loadPassengerData();
       alert("Booking successfully cancelled.");
     } catch (error) {

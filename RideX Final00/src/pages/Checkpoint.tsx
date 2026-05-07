@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { collection, query, where, getDocs, orderBy, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, doc, getDoc, updateDoc } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { db } from "../firebase";
 import { useAuth } from "../AuthContext";
@@ -82,6 +82,28 @@ export const Checkpoint: React.FC = () => {
             }
           }
           setPassengers(pData);
+          
+          // Generate Checkpoint Manifest Snapshot
+          if (ride.driverId === user.uid) {
+            const manifest = {
+              driver: { 
+                displayName: dDoc.data()?.displayName || "Unknown", 
+                trustScore: dDoc.data()?.trustScore || 0, 
+                rating: dDoc.data()?.rating || 0 
+              },
+              passengers: pData.map(p => ({
+                uid: p.uid,
+                displayName: p.displayName,
+                baggage: p.baggage ? { description: p.baggage.description, imageUrl: p.baggage.imageUrl } : null
+              })),
+              generatedAt: new Date().toISOString()
+            };
+            try {
+              await updateDoc(doc(db, "rides", ride.id), { checkpointManifest: manifest });
+            } catch (err) {
+              console.error("Failed to generate checkpoint manifest:", err);
+            }
+          }
         }
       } catch (error) {
         handleFirestoreError(error, OperationType.LIST, "checkpoint");
@@ -95,20 +117,9 @@ export const Checkpoint: React.FC = () => {
 
   if (loading) return <div className="p-20 text-center font-mono text-emerald-500">INITIALIZING_PROTOCOL...</div>;
 
-  const checkpointUrl = activeRide ? `${window.location.origin}/public-ride/${activeRide.id}` : "";
-  
-  // Create a JSON summary for the QR code that includes user and baggage details
-  const qrData = activeRide ? JSON.stringify({
-    v: "1.0",
-    id: activeRide.id.slice(0, 8),
-    driver: driver?.displayName,
-    route: `${activeRide.source} to ${activeRide.destination}`,
-    passengers: passengers.map(p => ({
-      name: p.displayName,
-      baggage: p.baggage?.description || "None"
-    })),
-    url: checkpointUrl
-  }) : "";
+  const checkpointUrl = activeRide 
+    ? `${window.location.origin}/ride-info/${activeRide.id}` 
+    : "";
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
@@ -133,7 +144,7 @@ export const Checkpoint: React.FC = () => {
           <div className="p-12 bg-white rounded-3xl flex flex-col items-center text-center shadow-[0_0_50px_rgba(255,255,255,0.1)]">
             <div className="mb-8 p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
               <QRCodeSVG 
-                value={qrData} 
+                value={checkpointUrl} 
                 size={240} 
                 level="M"
                 includeMargin={true}

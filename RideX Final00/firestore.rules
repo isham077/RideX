@@ -161,7 +161,7 @@ service cloud.firestore {
     // Profiles Collection
     match /profiles/{profileId} {
       allow read: if isAuthenticated() && (isOwner(profileId) || isAdmin());
-      allow create, update: if isOwner(profileId) && isValidProfile(request.resource.data);
+      allow create, update: if isOwner(profileId) && request.resource.data.userId == request.auth.uid;
       allow delete: if isAdmin();
     }
 
@@ -175,6 +175,14 @@ service cloud.firestore {
     match /alerts/{id} {
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow read: if isAdmin();
+    }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     // Default deny
