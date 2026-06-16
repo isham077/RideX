@@ -25,15 +25,16 @@ An intelligent, AI-driven carpooling architecture designed to optimize ride-shar
 RideX is a next-generation AI-powered carpooling platform that revolutionizes ride-sharing through intelligent algorithms and real-time decision making. The system combines a conversational AI interface with sophisticated backend logistics to deliver seamless, secure, and cost-effective ride-sharing experiences.
 
 **Key Features:**
-- 🤖 **AI-Driven Matching:** Natural language queries processed by Groq LLM for intelligent ride matching
-- 💰 **Dynamic Pricing:** Real-time fare calculation based on demand, distance, and vehicle class
-- 🔐 **Trust Scoring:** Real-time verification and user trust metrics
-- 📍 **Geolocation Integration:** Real-time GPS tracking with emergency protocols
-- 🚨 **SOS Protocol:** Integrated emergency response system via Twilio
+- 🤖 **AI-Driven Matching:** Natural language queries processed by Groq LLM for intelligent ride matching.
+- 💰 **Dynamic Pricing:** Real-time fare calculation based on demand, distance, and vehicle class.
+- 🔐 **Trust Scoring:** Real-time verification and user trust metrics.
+- 📍 **Geolocation Integration:** Real-time GPS tracking with emergency protocols.
+- 🚨 **SOS Protocol:** Integrated emergency response system via Twilio.
 
 ## Architecture Overview
 
-RideX is built on a serverless React/Vite frontend interacting directly with Firebase via heavily restricted Firestore Security Rules. The system abstracts complex logistics into natural language queries, enabling users to interact with sophisticated backend systems through conversational AI.
+RideX is built on a serverless React/Vite frontend interacting directly with Firebase via heavily restricted Firestore Security Rules. 
+The system abstracts complex logistics into natural language queries, enabling users to interact with sophisticated backend systems through conversational AI.
 
 ### Architecture Diagram
 
@@ -56,7 +57,8 @@ RideX is built on a serverless React/Vite frontend interacting directly with Fir
 ### Core Modules
 
 * **AI Conversational Interface (RideAI):** 
-  Integrated with the Groq API, the LLM intercepts user queries, translates them into structured Firestore queries via tool calling, and formats the output into human-readable data. Supports natural language requests like "Show me rides to downtown" or "Find carpools leaving at 5 PM."
+Integrated with the Groq API, the LLM intercepts user queries, translates them into structured Firestore queries via tool calling, and formats the output into human-readable data. 
+Supports natural language requests like "Show me rides to downtown" or "Find carpools leaving at 5 PM."
 
 * **Dynamic Pricing Engine:** 
   A custom gradient boosting model that calculates real-time fare estimates by evaluating multiple factors including:
