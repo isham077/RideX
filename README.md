@@ -478,7 +478,6 @@ For issues, questions, or suggestions, please reach out through these channels:
 - 🔜 Mobile app (React Native)
 - 🔜 Advanced analytics dashboard for drivers
 - 🔜 Scheduled rides and recurring trips
-- 🔜 Wallet integration and payment methods
 - 🔜 Social features (friend invitations, ride sharing)
 - 🔜 Accessibility improvements (screen reader support)
 
