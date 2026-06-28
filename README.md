@@ -474,12 +474,14 @@ For issues, questions, or suggestions, please reach out through these channels:
 - ✅ TailwindCSS responsive design
 - ✅ Google Maps integration for routing
 
-### Upcoming Features (Roadmap)
-- 🔜 Mobile app (React Native)
-- 🔜 Advanced analytics dashboard for drivers
-- 🔜 Scheduled rides and recurring trips
-- 🔜 Social features (friend invitations, ride sharing)
-- 🔜 Accessibility improvements (screen reader support)
+### 🚀 Upcoming Features
+
+* 📱 **Mobile App** – Native apps for Android and iOS built with React Native.
+* 📊 **Driver Analytics Dashboard** – Detailed insights into trips, earnings, and performance.
+* 📅 **Scheduled & Recurring Rides** – Book rides in advance or set up recurring trips.
+* 👥 **Social Features** – Invite friends, share rides, and connect with other users.
+* ♿ **Accessibility Enhancements** – Improved support for screen readers and other assistive technologies.
+
 
 ---
 
