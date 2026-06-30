@@ -112,11 +112,14 @@ Machine learning-based user verification system that evaluates:
 
 Before getting started, ensure you have the following installed:
 
-- **Node.js** v18 or higher
-- **npm** or **yarn** package manager
-- **Git** version control
-- A **Firebase account** (free tier available)
-- API keys for: Groq, Twilio, and Google Maps
+Node.js (v18 or later)
+npm or Yarn package manager
+Git for version control
+A Firebase account (the free tier is sufficient)
+Valid API keys for the following services:
+Groq
+Twilio
+Google Maps
 
 ## Quick Start
 
