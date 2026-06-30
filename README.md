@@ -108,18 +108,22 @@ Machine learning-based user verification system that evaluates:
 | **Geolocation** | Browser Geolocation API, Google Maps API |
 | **DevOps** | Vite Build System, Firebase Hosting |
 
-## Prerequisites
+## 📋 Prerequisites
 
-Before getting started, ensure you have the following installed:
+Before you begin, ensure you have the following installed and configured:
 
-Node.js (v18 or later)
-npm or Yarn package manager
-Git for version control
-A Firebase account (the free tier is sufficient)
-Valid API keys for the following services:
-Groq
-Twilio
-Google Maps
+* **Node.js** (v18 or later)
+* **npm** or **Yarn** package manager
+* **Git** for version control
+* A **Firebase** account (the free tier is sufficient)
+* Valid API keys for the following services:
+
+  * **Groq**
+  * **Twilio**
+  * **Google Maps**
+
+> **Note:** Make sure all required API keys are generated and properly configured before running the application.
+
 
 ## Quick Start
 
