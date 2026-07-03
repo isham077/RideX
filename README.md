@@ -116,7 +116,6 @@ Before you begin, ensure you have the following installed and configured:
 * **npm** or **Yarn** package manager
 * **Git** for version control
 * A **Firebase** account (the free tier is sufficient)
-* Valid API keys for the following services:
 
   * **Groq**
   * **Twilio**
