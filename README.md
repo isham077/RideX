@@ -42,7 +42,9 @@ RideX is a next-generation AI-powered carpooling platform that revolutionizes ri
 
 ## Architecture Overview
 
-RideX is built on a serverless React/Vite frontend that interacts directly with Firebase via heavily restricted Firestore Security Rules. The system abstracts complex logistics into natural language queries, enabling users to interact with sophisticated backend systems through conversational AI powered by the Groq API.
+RideX is built on a serverless architecture with a React and Vite frontend integrated directly with Firebase. Data access and operations are protected through strict Firestore Security Rules to ensure secure and controlled interactions.
+
+The platform simplifies complex logistics workflows by allowing users to perform tasks and access information using natural language queries. Conversational AI, powered by the Groq API, interprets user requests and enables seamless interaction with the system’s backend services.
 
 ### Architecture Diagram
 
