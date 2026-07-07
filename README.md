@@ -472,15 +472,17 @@ For issues, questions, or suggestions, please reach out through these channels:
 
 ## Changelog
 
-### v1.0.0 (Current Release)
-- ✅ Initial AI-driven carpooling system with Groq LLM integration
-- ✅ Dynamic pricing engine with gradient boosting model
-- ✅ Real-time trust scoring system with ML-based verification
-- ✅ Emergency SOS protocol with Twilio integration
-- ✅ Firebase backend with Firestore security rules
-- ✅ React 19 frontend with Vite build system
-- ✅ TailwindCSS responsive design
-- ✅ Google Maps integration for routing
+### v1.0.0 — Current Release
+
+* ✅ Launched an AI-powered carpooling platform with Groq LLM integration for intelligent ride matching and decision support.
+* ✅ Implemented a dynamic pricing engine powered by a gradient boosting model.
+* ✅ Developed a real-time trust scoring system with ML-based user verification.
+* ✅ Integrated an emergency SOS protocol with Twilio for rapid alert communication.
+* ✅ Built a Firebase backend with Firestore and robust security rules.
+* ✅ Developed a high-performance frontend using React 19 and Vite.
+* ✅ Created a responsive, mobile-first interface with Tailwind CSS.
+* ✅ Integrated Google Maps for route planning, navigation, and location-based functionality.
+
 
 ### 🚀 Upcoming Features
 
