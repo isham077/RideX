@@ -460,7 +460,7 @@ All contributions must adhere to these standards:
 
 ## License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for complete details.
+This project is licensed under the MIT License. For more information, see the LICENSE file.
 
 ## Support
 
