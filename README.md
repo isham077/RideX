@@ -490,7 +490,7 @@ For issues, questions, or suggestions, please reach out through these channels:
 * 📊 **Driver Analytics Dashboard** – Detailed insights into trips, earnings, and performance.
 * 📅 **Scheduled & Recurring Rides** – Book rides in advance or set up recurring trips.
 * 👥 **Social Features** – Invite friends, share rides, and connect with other users.
-* ♿ **Accessibility Enhancements** – Improved support for screen readers and other assistive technologies.
+
 
 
 ---
