@@ -163,8 +163,12 @@ async function startServer() {
 
       const accountSid = process.env.TWILIO_ACCOUNT_SID;
       const authToken = process.env.TWILIO_AUTH_TOKEN;
-      // Hardcode the from number as requested to ensure it's correct
-      const fromPhone = "+14706228611";
+      const fromPhone = process.env.TWILIO_PHONE_NUMBER;
+
+      if (!fromPhone) {
+        return res.status(500).json({ error: "TWILIO_PHONE_NUMBER is not set on the server." });
+      }
+
 
       // CRITICAL: Check if to and from numbers are the same
       if (phone === fromPhone) {
