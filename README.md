@@ -160,10 +160,10 @@ Endpoints implemented in [`server.ts`](./RideX%20Final00/server.ts):
 
 ## Roadmap
 
-- Develop native mobile applications using React Native
-- Launch a comprehensive driver analytics dashboard
-- Introduce scheduled and recurring ride bookings
-- Add social ride-sharing features, including friend invitations and shared trips
+-Build high-performance native mobile applications with React Native.
+-Launch a comprehensive driver analytics dashboard with actionable insights.
+-Enable scheduled and recurring ride bookings for greater convenience.
+-Introduce social ride-sharing features, including friend invitations and shared trip experiences.
 
 ## Contributing
 
