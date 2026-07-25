@@ -154,9 +154,9 @@ Endpoints implemented in [`server.ts`](./RideX%20Final00/server.ts):
 
 ## Security Notes
 
-- Firestore access is governed by `firestore.rules`; the Firebase web config in `firebase-applet-config.json` is a public client key by design, not a secret.
-- Server-side secrets (`GROQ_API_KEY`, Twilio credentials/number) are read from environment variables and are never sent to the client.
-- The Checkpoint manifest feature is designed to expose only the minimum data needed for ride verification, keeping full booking records and PII in protected Firestore paths.
+- Access to Firestore is controlled through firestore.rules. The Firebase web configuration in firebase-applet-config.json contains only public client-side configuration values and is intentionally exposed; it does not include sensitive credentials.
+- Sensitive server-side credentials, including GROQ_API_KEY and Twilio account credentials (such as the Account SID, Auth Token, and phone number), are securely stored as environment variables and are never exposed to the client application.
+- The Checkpoint Manifest feature follows the principle of least privilege by exposing only the minimum information required for ride verification. Complete booking records and personally identifiable information (PII) remain securely stored in protected Firestore collections with restricted access.
 
 ## Roadmap
 
