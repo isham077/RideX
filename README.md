@@ -163,7 +163,7 @@ Endpoints implemented in [`server.ts`](./RideX%20Final00/server.ts):
 -Develop high-performance native mobile applications using React Native.
 -Launch a comprehensive driver analytics dashboard featuring actionable insights and performance metrics.
 -Enable scheduled and recurring ride bookings to provide greater flexibility and convenience.
--Introduce social ride-sharing features, including friend invitations and shared trip experiences.
+-Introduce social ride-sharing features, enabling users to invite friends, share rides, and enhance their journey through shared trip experiences.
 
 ## Contributing
 
