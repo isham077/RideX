@@ -156,7 +156,7 @@ Endpoints implemented in [`server.ts`](./RideX%20Final00/server.ts):
 
 - Access to Firestore is controlled through firestore.rules. The Firebase web configuration in firebase-applet-config.json contains only public client-side configuration values and is intentionally exposed; it does not include sensitive credentials.
 - Sensitive server-side credentials, including GROQ_API_KEY and Twilio account credentials (such as the Account SID, Auth Token, and phone number), are securely stored as environment variables and are never exposed to the client application.
-- The Checkpoint Manifest feature follows the principle of least privilege by exposing only the minimum information required for ride verification. Complete booking records and personally identifiable information (PII) remain securely stored in protected Firestore collections with restricted access.
+- The Checkpoint Manifest feature adheres to the principle of least privilege by exposing only the minimum information necessary for ride verification. Complete booking records and personally identifiable information (PII) are securely maintained in protected Firestore collections with restricted access controls.
 
 ## Roadmap
 
