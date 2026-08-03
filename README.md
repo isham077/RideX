@@ -130,7 +130,7 @@ The app is served at **http://localhost:3000** (the Express server, not Vite's d
 
 Firebase client configuration lives in `firebase-applet-config.json` (this holds the public Firebase web config, which is safe to expose — access is controlled by `firestore.rules`, not by hiding this file).
 
-The app continues to run even when the Groq/Twilio environment variables aren't configured. In that case, the chat and SOS endpoints return clear error messages and logs instead of failing silently.
+The application continues to run even if the Groq or Twilio environment variables are not configured. In such cases, the chat and SOS endpoints return clear error messages and generate informative logs, ensuring configuration issues are explicit rather than failing silently.
 
 ## Available Scripts
 
